@@ -39,6 +39,11 @@ var SerialGenerator = function SerialGenerator(options) {
 		mapPitches = function (index) {
 			var pitch = row[positiveMod(index, 12)];
 			return pitch;
+		},
+		
+		mapPositions = function (item) {
+			var pitch = row.indexOf(positiveMod(item, 12));
+			return pitch;
 		};
 	
 	this.getPitches = function (callback) {
@@ -53,9 +58,15 @@ var SerialGenerator = function SerialGenerator(options) {
 		});
 	};
 	
-	this.getPositions = function () {
+	this.getPositions = function (callback) {
+		callback = callback || function (item, lookup) {
+			var pitch = lookup(item);
+			return pitch;
+		}
+	
 		return positions.map(function (item) {
-			return row.indexOf(item);
+			var pitch = callback(item, mapPositions);
+			return pitch;
 		});
 	};
 };
@@ -217,7 +228,7 @@ describe("SerialGenerator", function () {
 			expect(result).toEqual([0, 3, 1, 2, 4, 5, 6, 7, 8, 9, 10, 11]);
 		});
 		
-		it("should map the row correctly when ", function () {
+		it("should map the row correctly when a rotation transformation is passed in", function () {
 			var sg = new SerialGenerator({
 					row: row
 				}),
@@ -225,7 +236,7 @@ describe("SerialGenerator", function () {
 					return lookup(item + 1);
 				});
 			
-			expect(result).toEqual([0, 3, 1, 2, 4, 5, 6, 7, 8, 9, 10, 11]);
+			expect(result).toEqual([3, 1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 0]);
 		});
 	});
 
