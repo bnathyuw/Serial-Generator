@@ -171,9 +171,9 @@ describe("SerialGenerator", function () {
 					row: row
 				}),
 				result = sg.getPitches(function (item, lookup) {
-					return lookup(item) * 5;
+					return lookup(item) * 4;
 				});
-			expect(result).toEqual([ 0, 10, 3, 5, 8, 1, 6, 11, 4, 9, 2, 7 ]);
+			expect(result).toEqual([0, 8, 0, 4, 4, 8, 0, 4, 8, 0, 4, 8]);
 		});
 		
 		it("should return the correct row when a position skipping transformation is passed in", function () {
@@ -181,9 +181,9 @@ describe("SerialGenerator", function () {
 					row: row
 				}),
 				result = sg.getPitches(function (item, lookup) {
-					return lookup(item * 5);
+					return lookup(item * 4);
 				});
-			expect(result).toEqual([ 0, 5, 10, 1, 8, 2, 6, 11, 4, 9, 3, 7 ]);
+			expect(result).toEqual([0, 4, 8, 0, 4, 8, 0, 4, 8, 0, 4, 8]);
 		});
 		
 		it("should be able to retrograde the series", function () {
@@ -259,6 +259,28 @@ describe("SerialGenerator", function () {
 				});
 			
 			expect(result).toEqual([4, 2, 3, 5, 6, 7, 8, 9, 10, 11, 0, 1]);
+		});
+		
+		it("should do something", function () {
+			var sg = new SerialGenerator({
+					row: row
+				}),
+				result = sg.getPositions(function (item, lookup) {
+					return lookup(item * 4);
+				});
+			
+			expect(result).toEqual([0, 4, 8, 0, 4, 8, 0, 4, 8, 0, 4, 8]);
+		});
+		
+		it("should do something else", function () {
+			var sg = new SerialGenerator({
+					row: row
+				}),
+				result = sg.getPositions(function (item, lookup) {
+					return lookup(item) * 4;
+				});
+			
+			expect(result).toEqual([0, 0, 4, 8, 4, 8, 0, 4, 8, 0, 4, 8]);
 		});
 	});
 
