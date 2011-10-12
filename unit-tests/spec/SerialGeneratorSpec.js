@@ -62,10 +62,10 @@ var SerialGenerator = function SerialGenerator(options) {
 		callback = callback || function (item, lookup) {
 			var pitch = lookup(item);
 			return pitch;
-		}
+		};
 	
 		return positions.map(function (item) {
-			var pitch = callback(item, mapPositions);
+			var pitch = positiveMod(callback(item, mapPositions), 12);
 			return pitch;
 		});
 	};
@@ -221,7 +221,7 @@ describe("SerialGenerator", function () {
 			var sg = new SerialGenerator({
 					row: row
 				}),
-				result = sg.getPositions(function (item, lookup){
+				result = sg.getPositions(function (item, lookup) {
 					return lookup(item);
 				});
 			
@@ -232,11 +232,33 @@ describe("SerialGenerator", function () {
 			var sg = new SerialGenerator({
 					row: row
 				}),
-				result = sg.getPositions(function (item, lookup){
+				result = sg.getPositions(function (item, lookup) {
 					return lookup(item + 1);
 				});
 			
 			expect(result).toEqual([3, 1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 0]);
+		});
+		
+		it("should map the row correctly when a transposition transformation is passed in", function () {
+			var sg = new SerialGenerator({
+					row: row
+				}),
+				result = sg.getPositions(function (item, lookup) {
+					return lookup(item) + 1;
+				});
+			
+			expect(result).toEqual([1, 4, 2, 3, 5, 6, 7, 8, 9, 10, 11, 0]);
+		});
+		
+		it("should map the row correctly when a rotation and transposition transformation is passed in", function () {
+			var sg = new SerialGenerator({
+					row: row
+				}),
+				result = sg.getPositions(function (item, lookup) {
+					return lookup(item + 1) + 1;
+				});
+			
+			expect(result).toEqual([4, 2, 3, 5, 6, 7, 8, 9, 10, 11, 0, 1]);
 		});
 	});
 
