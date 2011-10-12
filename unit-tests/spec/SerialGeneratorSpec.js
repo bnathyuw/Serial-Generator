@@ -29,10 +29,28 @@ var SerialGenerator = function SerialGenerator(options) {
 	}
 	
 	var row = options.row,
-		positions = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 	
-	this.getPitches = function () {
-		return row;
+		positions = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+		
+		positiveMod = function (number, modulus) {
+			return (number % modulus + modulus) % modulus;
+		},
+		
+		mapPitches = function (index) {
+			var pitch = row[positiveMod(index, 12)];
+			return pitch;
+		};
+	
+	this.getPitches = function (callback) {
+		callback = callback || function (item, lookup) {
+			var pitch = lookup(item);
+			return pitch;
+		};
+	
+		return positions.map(function (item) {
+			var pitch = positiveMod(callback(item, mapPitches), 12);
+			return pitch;
+		});
 	};
 	
 	this.getPositions = function () {
@@ -46,6 +64,8 @@ var SerialGenerator = function SerialGenerator(options) {
 
 describe("SerialGenerator", function () {
 	"use strict";
+	
+	var row = [0, 2, 3, 1, 4, 5, 6, 7, 8, 9, 10, 11];
 	
 	describe("construtor", function () {
 	
@@ -80,30 +100,130 @@ describe("SerialGenerator", function () {
 		
 		it("should not throw an exception if you do pass in a row", function () {
 			var sg = new SerialGenerator({
-				row: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+				row: row
 			});
 		});
 	});
 	
 	describe("getPitches", function () {
 		it("should return the row from the constructor when no parameters are passed in", function () {
-			var row = [0, 2, 3, 1, 4, 5, 6, 7, 8, 9, 10, 11],
-				sg = new SerialGenerator({
+			var	sg = new SerialGenerator({
 					row: row
 				}),
 				result = sg.getPitches();
 				
 			expect(result).toEqual(row);
 		});
+		
+		it("should return the row when an identity transformation is passed in", function () {
+			var sg = new SerialGenerator({
+					row: row
+				}),
+				result = sg.getPitches(function (item, lookup) {
+					return lookup(item);
+				});
+			expect(result).toEqual(row);
+		});
+		
+		it("should return the correct row when a transposition transformation is passed in", function () {
+			var sg = new SerialGenerator({
+					row: row
+				}),
+				result = sg.getPitches(function (item, lookup) {
+					return lookup(item) + 1;
+				});
+			expect(result).toEqual([1, 3, 4, 2, 5, 6, 7, 8, 9, 10, 11, 0]);
+		});
+		
+		it("should return the correct row when a rotation transformation is passed in", function () {
+			var sg = new SerialGenerator({
+					row: row
+				}),
+				result = sg.getPitches(function (item, lookup) {
+					return lookup(item + 1);
+				});
+			expect(result).toEqual([2, 3, 1, 4, 5, 6, 7, 8, 9, 10, 11, 0]);
+		});
+		
+		it("should return the correct row when a rotation and transposition transformation is passed in", function () {
+			var sg = new SerialGenerator({
+					row: row
+				}),
+				result = sg.getPitches(function (item, lookup) {
+					return lookup(item + 1) + 1;
+				});
+			expect(result).toEqual([3, 4, 2, 5, 6, 7, 8, 9, 10, 11, 0, 1]);
+		});
+		
+		it("should return the correct row when a pitch stretching transformation is passed in", function () {
+			var sg = new SerialGenerator({
+					row: row
+				}),
+				result = sg.getPitches(function (item, lookup) {
+					return lookup(item) * 5;
+				});
+			expect(result).toEqual([ 0, 10, 3, 5, 8, 1, 6, 11, 4, 9, 2, 7 ]);
+		});
+		
+		it("should return the correct row when a position skipping transformation is passed in", function () {
+			var sg = new SerialGenerator({
+					row: row
+				}),
+				result = sg.getPitches(function (item, lookup) {
+					return lookup(item * 5);
+				});
+			expect(result).toEqual([ 0, 5, 10, 1, 8, 2, 6, 11, 4, 9, 3, 7 ]);
+		});
+		
+		it("should be able to retrograde the series", function () {
+			var sg = new SerialGenerator({
+					row: row
+				}),
+				result = sg.getPitches(function (item, lookup) {
+					return lookup(-item);
+				});
+			expect(result).toEqual([0, 11, 10, 9, 8, 7, 6, 5, 4, 1, 3, 2]);
+		});
+		
+		it("should be able to invert the series", function () {
+			var sg = new SerialGenerator({
+					row: row
+				}),
+				result = sg.getPitches(function (item, lookup) {
+					return -lookup(item);
+				});
+			expect(result).toEqual([0, 10, 9, 11, 8, 7, 6, 5, 4, 3, 2, 1]);
+		});
 	});
 	
 	describe("getPositions", function () {
 		it("should map the row correctly when no parameters are passed in", function () {
-			var row = [0, 2, 3, 1, 4, 5, 6, 7, 8, 9, 10, 11],
-				sg = new SerialGenerator({
+			var sg = new SerialGenerator({
 					row: row
 				}),
 				result = sg.getPositions();
+			
+			expect(result).toEqual([0, 3, 1, 2, 4, 5, 6, 7, 8, 9, 10, 11]);
+		});
+		
+		it("should map the row correctly when an identity transformation is passed in", function () {
+			var sg = new SerialGenerator({
+					row: row
+				}),
+				result = sg.getPositions(function (item, lookup){
+					return lookup(item);
+				});
+			
+			expect(result).toEqual([0, 3, 1, 2, 4, 5, 6, 7, 8, 9, 10, 11]);
+		});
+		
+		it("should map the row correctly when ", function () {
+			var sg = new SerialGenerator({
+					row: row
+				}),
+				result = sg.getPositions(function (item, lookup){
+					return lookup(item + 1);
+				});
 			
 			expect(result).toEqual([0, 3, 1, 2, 4, 5, 6, 7, 8, 9, 10, 11]);
 		});
