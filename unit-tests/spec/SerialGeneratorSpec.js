@@ -261,7 +261,7 @@ describe("SerialGenerator", function () {
 			expect(result).toEqual([4, 2, 3, 5, 6, 7, 8, 9, 10, 11, 0, 1]);
 		});
 		
-		it("should do something", function () {
+		it("should map the row correctly with a pitch reorderer", function () {
 			var sg = new SerialGenerator({
 					row: row
 				}),
@@ -272,7 +272,7 @@ describe("SerialGenerator", function () {
 			expect(result).toEqual([0, 4, 8, 0, 4, 8, 0, 4, 8, 0, 4, 8]);
 		});
 		
-		it("should do something else", function () {
+		it("should map the row correctly with a pitch multiplier", function () {
 			var sg = new SerialGenerator({
 					row: row
 				}),
